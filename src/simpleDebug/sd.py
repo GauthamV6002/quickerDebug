@@ -24,10 +24,15 @@ class SimpleDebug:
         self.simpleAutoVarsIndex = 0
         self.typeColors = kwargs.get("typeColors", {
             "int": "green",
-            "float": ("green", "dark"),
+            "float": "green",
             "complex": "green",
-            "string": "yellow",
-            "bool": "blue"
+            "str": "yellow",
+            "bool": "red",
+            "list": "blue",
+            "tuple": "cyan",
+            "set": "cyan",
+            "frozenset": "cyan",
+            "dict": "magenta"
         })
         self.statusColors = kwargs.get("statusColors", {
             "OFF": "magenta",
@@ -106,14 +111,14 @@ class SimpleDebug:
         if kwargs["inline"]:
             sidebar = colored(' ', kwargs['clr'], attrs=['reverse'])
             formattedAutoVars = f", ".join(
-                [f"{k} = {v}" for k, v in autoVars.items()])
+                [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
             print(
                 f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
         else:
             sidebar = colored(' ', kwargs['clr'], attrs=['reverse'])
             # Formats with a join
             formattedAutoVars = f"\n{sidebar} ".join(
-                [f"{k} = {v}" for k, v in autoVars.items()])
+                [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
             print(
                 f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
 
@@ -126,4 +131,4 @@ class SimpleDebug:
 
 
 sd = SimpleDebug()
-sd.v(True)
+sd.v(False)

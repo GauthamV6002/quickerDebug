@@ -1,6 +1,6 @@
 from inspect import getframeinfo, stack
-import traceback
-from colorama import Fore, Style
+from termcolor import colored
+import os
 
 
 class SimpleDebug:
@@ -23,18 +23,31 @@ class SimpleDebug:
         })
 
     def simpleAutoPrint(self, **kwargs):
-        status = kwargs.get("status", "LOG")
-        msg = kwargs.get("msg", "")
-        caller = getframeinfo(stack()[-1][0])
-        line = caller.lineno
-        file = caller.filename
-        root_function = "exec()"
-        print(f'{status}\t|SAP CALL|\tLn {line} in {file} at {root_function}\t{msg}')
+        status = kwargs.get("status", "DEBUG")
+        if kwargs["color"] != None:
+            status_clr = kwargs["color"]
+        else:
+            status_clr = status_clr = self.statusColors.get(status, "green")
+        status = colored(status, status_clr)
 
-    def sap(self, status="LOG", **kwargs):
-        kwargs.status = status
+        caller = getframeinfo(stack()[-1][0])
+        filePath = os.path.basename(
+            caller.filename) if not kwargs["showFullPath"] else caller.filename
+        line = colored(f"Ln {caller.lineno}", "white",
+                       f"on_{status_clr}", attrs=['bold'])
+        file = colored(filePath, attrs=['underline'])
+        root_function = "exec()"
+
+        msg = kwargs.get("msg", "")
+        print(
+            f'{status}\t|SAP CALL|\t{line}, in {file} at {root_function}\t{msg}')
+
+    def sap(self, status="DEBUG", color=None, showFullPath=False, **kwargs):
+        kwargs["status"] = status
+        kwargs["showFullPath"] = showFullPath
+        kwargs["color"] = color
         self.simpleAutoPrint(**kwargs)
 
 
 sd = SimpleDebug()
-sd.sap()
+sd.sap("TRACE")

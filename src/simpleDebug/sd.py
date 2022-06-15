@@ -69,14 +69,3 @@ class SimpleDebug:
 
 
 sd = SimpleDebug()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()
-sd.p()

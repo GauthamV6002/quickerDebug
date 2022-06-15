@@ -42,7 +42,7 @@ class SimpleDebug:
         print(
             f'{status}\t|SAP CALL|\t{line}, in {file} at {root_function}\t{msg}')
 
-    def sap(self, status="DEBUG", color=None, showFullPath=False, **kwargs):
+    def p(self, msg="", status="DEBUG", color=None, showFullPath=False, **kwargs):
         kwargs["status"] = status
         kwargs["showFullPath"] = showFullPath
         kwargs["color"] = color
@@ -50,4 +50,4 @@ class SimpleDebug:
 
 
 sd = SimpleDebug()
-sd.sap("TRACE")
+sd.p("bruh", "TRACE")

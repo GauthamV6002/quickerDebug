@@ -23,7 +23,11 @@ class SimpleDebug:
         self.simpleAutoPrintIndex = 0
         self.simpleAutoVarsIndex = 0
         self.typeColors = kwargs.get("typeColors", {
-
+            "int": "green",
+            "float": ("green", "dark"),
+            "complex": "green",
+            "string": "yellow",
+            "bool": "blue"
         })
         self.statusColors = kwargs.get("statusColors", {
             "OFF": "magenta",

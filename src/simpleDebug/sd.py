@@ -8,6 +8,7 @@ import math
 class SimpleDebug:
     def __init__(self, **kwargs):
         self.startTime = time.perf_counter()
+        self.simpleAutoPrintIndex = 0
         self.statusColors = kwargs.get("statusColors", {
             "OFF": "magenta",
             "O": "magenta",
@@ -31,6 +32,8 @@ class SimpleDebug:
         return f"{mins}:{secs}"
 
     def simpleAutoPrint(self, **kwargs):
+        index = colored(f"[{self.simpleAutoPrintIndex}]",
+                        "grey", attrs=['dark'])
         timestamp = colored(self.getTimestamp(
             time.perf_counter()), "grey", "on_white", attrs=["dark"])
 
@@ -53,7 +56,9 @@ class SimpleDebug:
             msg = "Message: " + \
                 colored(kwargs.get("msg", ""), "grey", attrs=['bold'])
 
-        print(f'{timestamp}    {status}    |SAP CALL|    {line}, in {file}\t{msg}')
+        print(
+            f'{index}  {timestamp}    {status}    |SAP CALL|    {line}, in {file}\t{msg}')
+        self.simpleAutoPrintIndex += 1
 
     def p(self, status="DEBUG", msg="", color=None, showFullPath=False, **kwargs):
         kwargs["status"] = status
@@ -64,4 +69,14 @@ class SimpleDebug:
 
 
 sd = SimpleDebug()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
+sd.p()
 sd.p()

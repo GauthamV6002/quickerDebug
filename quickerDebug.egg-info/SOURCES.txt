@@ -1,0 +1,10 @@
+LICENSE
+README.md
+pyproject.toml
+setup.cfg
+quickerDebug/__init__.py
+quickerDebug/quickerDebug.py
+quickerDebug.egg-info/PKG-INFO
+quickerDebug.egg-info/SOURCES.txt
+quickerDebug.egg-info/dependency_links.txt
+quickerDebug.egg-info/top_level.txt

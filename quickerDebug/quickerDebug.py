@@ -1,6 +1,4 @@
-from enum import auto
 from inspect import getframeinfo, stack
-from tracemalloc import start
 from termcolor import colored
 import os
 import time
@@ -8,18 +6,8 @@ import math
 from types import ModuleType, FunctionType
 import threading
 
-a = 1
-b = "hello"
-x = True
-my_var = 23.42
 
-my_dict = {"a": 1, "b": 2, "c": 3}
-l = [1, 2, 3, 4, 5]
-s = {1, 2, 3}
-t = (2, 3, 4)
-
-
-class SimpleDebug:
+class QuickerDebug:
     def __init__(self, **kwargs):
         self.startTime = time.perf_counter()
         self.simpleAutoPrintIndex = 0
@@ -89,7 +77,7 @@ class SimpleDebug:
                 colored(kwargs.get("msg", ""), "grey", attrs=['bold'])
 
         print(
-            f'{index}  {timestamp}    {status}    |SAP CALL|    {lnf}\t{msg}')
+            f'{index}  {timestamp}    {status}    |AUTOPRINT CALL|    {lnf}\t{msg}')
         self.simpleAutoPrintIndex += 1
 
     def p(self, status="DEBUG", msg="", color=None, showFullPath=False, **kwargs):
@@ -103,14 +91,14 @@ class SimpleDebug:
     def vc(self, slot, *filters, **kwargs):
         self.simpleAutoVarsConfigs[slot] = (filters, kwargs)
 
-    def simpleAutoVars(self, config_slot, **kwargs):
-        clr = kwargs.get("clr", "cyan")
+    def simpleAutoVars(self, config_slot=None, **kwargs):
+        color = kwargs.get("color", "cyan")
         index = colored(f"[V{self.simpleAutoVarsIndex}]",
                         "grey", attrs=['dark'])
         timestamp = colored(self.getTimestamp(
             time.perf_counter()), attrs=["reverse"])
 
-        lnf = self.getLineFileInfo(kwargs.get("showFullPath", False), clr)
+        lnf = self.getLineFileInfo(kwargs.get("showFullPath", False), color)
 
         # Creates vars from globals by removing dunders, functions and modules
         filters = self.simpleAutoVarsConfigs[config_slot][0] if config_slot else kwargs.get(
@@ -121,7 +109,7 @@ class SimpleDebug:
             autoVars = {k: v for k, v in globals().items() if not(
                 (k.startswith("__") and k.endswith("__")) or callable(v) or isinstance(v, ModuleType))}
 
-        sidebar = colored(' ', clr, attrs=['reverse'])
+        sidebar = colored(' ', color, attrs=['reverse'])
         joiner = (", " if kwargs.get("inline", False) else f"\n{sidebar} ")
 
         formattedAutoVars = joiner.join(
@@ -132,13 +120,15 @@ class SimpleDebug:
 
         self.simpleAutoVarsIndex += 1
 
-    def v(self, slot, **kwargs):
-        if not slot in self.simpleAutoVarsConfigs:
+    def v(self, slot=None, **kwargs):
+        if slot == None:
+            self.simpleAutoVars(**kwargs)
+        elif (not slot in self.simpleAutoVarsConfigs):
             raise Exception(
                 f"Auto Var Config Error: Slot \"{slot}\" was not found. Ensure that you've used pd.vc(slot) to create the respective configuration")
         else:
             self.simpleAutoVars(
-                slot, **(self.simpleAutoVarsConfigs[slot][1] | kwargs))
+                slot, **({**self.simpleAutoVarsConfigs[slot][1], **kwargs}))
 
     def track(self, var, delay, duration=None, **kwargs):
         self.trackedIndices[var] = 0

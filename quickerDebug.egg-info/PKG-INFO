@@ -1,3 +1,17 @@
+Metadata-Version: 2.1
+Name: quickerDebug
+Version: 0.1.3
+Summary: Instant debugger alternative for python
+Home-page: https://github.com/GauthamV6002/quickDebug
+Author: Gautham Venkateshwaran
+Author-email: gauthamv6002@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.8.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Welcome to quickerDebug!
 
 QuickerDebug offers a standardized alternative to `print("here")` and `print(my_var)` with simple, quick, and efficient logging functions that provide information without the need to repeat yourself. Generally, the best use case is for small scale applications or test code, where a complete debugger is overkill, but `print("here")` can get overly tedious to repeatedly type. Function names are purposefully shortened avoid writing out long function calls, so you don't waste time while debugging.

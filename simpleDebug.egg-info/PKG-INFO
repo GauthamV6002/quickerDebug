@@ -1,3 +1,17 @@
+Metadata-Version: 2.1
+Name: simpleDebug
+Version: 0.0.1
+Summary: Instant debugger alternative for python
+Home-page: //
+Author: Gautham Venkateshwaran
+Author-email: gauthamv6002@gmail.com
+Classifier: Programming Language :: Python :: 3
+Classifier: Liscense :: MIT Liscense
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.10.0
+Description-Content-Type: text/markdown
+License-File: LICENSE
+
 # Welcome to simpleDebug!
 
 ## :warning: Yet to be deployed, please wait 1 - 2 days
@@ -12,11 +26,11 @@ simpleDebug offers a standardized alternative to `print("here")` and `print(my_v
 
 #### Initialization
 
-To use the package, you need to create an instance of `SimpleDebug`, from which methods can be called.
+To use the package, you need to create an instance of `simpleDebug`, from which methods can be called.
 
 ```python
-from simpleDebug import simpleDebug
-sd = simpleDebug.SimpleDebug()
+import simpleDebug
+sd = simpleDebug()
 ```
 
 #### Basic Logging

@@ -169,6 +169,3 @@ class SimpleDebug:
         # Real Time Tracker Preset
     def rt(self, var, **kwargs):
         self.track(var, 1, **kwargs)
-
-
-sd = SimpleDebug()

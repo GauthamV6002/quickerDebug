@@ -142,8 +142,9 @@ class SimpleDebug:
 
     def track(self, var, delay, duration=None, **kwargs):
         self.trackedIndices[var] = 0
+        autoclear = kwargs.get("autoclear", False)
 
-        def printTrackInfo(varName, delay, duration, caller):
+        def printTrackInfo(varName, delay, duration, caller, autoclear):
             startTime = time.perf_counter()
             while True:
                 index = colored(
@@ -153,21 +154,23 @@ class SimpleDebug:
                     f'{varName} = {globals()[varName]}', "magenta")
                 print(
                     f'{index}    {clr_val}    {self.getTimestamp(time.perf_counter())}    |TRACK|    {lnf}')
+                if autoclear:
+                    os.system('cls||clear')
                 self.trackedIndices[varName] += 1
                 time.sleep((delay / 1000))
                 if (time.perf_counter() - startTime) > duration:
                     break
 
         t = threading.Thread(target=printTrackInfo,
-                             args=(var, delay, duration, getframeinfo(stack()[-1][0])))
+                             args=(var, delay, duration, getframeinfo(stack()[-1][0]), autoclear))
         t.start()
 
 
 sd = SimpleDebug()
 sd.vc(2, "a", "b")
 
-sd.track("a", 10, 10)
+sd.track("a", 10, 10, autoclear=True)
 
-for i in range(1000):
-    a += 1
+for i in range(100):
+    a += i
     time.sleep(0.1)

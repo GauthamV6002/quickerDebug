@@ -158,19 +158,17 @@ class SimpleDebug:
                     os.system('cls||clear')
                 self.trackedIndices[varName] += 1
                 time.sleep((delay / 1000))
-                if (time.perf_counter() - startTime) > duration:
-                    break
+                if(duration):
+                    if (time.perf_counter() - startTime) > duration:
+                        break
 
         t = threading.Thread(target=printTrackInfo,
                              args=(var, delay, duration, getframeinfo(stack()[-1][0]), autoclear))
         t.start()
 
+        # Real Time Tracker Preset
+    def rt(self, var, **kwargs):
+        self.track(var, 1, **kwargs)
+
 
 sd = SimpleDebug()
-sd.vc(2, "a", "b")
-
-sd.track("a", 10, 10, autoclear=True)
-
-for i in range(100):
-    a += i
-    time.sleep(0.1)

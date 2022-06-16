@@ -1,10 +1,12 @@
 from enum import auto
 from inspect import getframeinfo, stack
+from tracemalloc import start
 from termcolor import colored
 import os
 import time
 import math
 from types import ModuleType, FunctionType
+import threading
 
 a = 1
 b = "hello"
@@ -22,6 +24,7 @@ class SimpleDebug:
         self.startTime = time.perf_counter()
         self.simpleAutoPrintIndex = 0
         self.simpleAutoVarsIndex = 0
+        self.trackedIndices = {}
         self.typeColors = kwargs.get("typeColors", {
             "int": "green",
             "float": "green",
@@ -50,14 +53,15 @@ class SimpleDebug:
             "TRACE": "cyan",
             "T": "cyan",
         })
+        self.simpleAutoVarsConfigs = {}
 
     def getTimestamp(self, t):
         mins = math.floor((t - self.startTime)/60)
         secs = (t - self.startTime) - mins*60
         return f"{mins}:{secs}"
 
-    def getLineFileInfo(self, showFullPath, clr):
-        caller = getframeinfo(stack()[-1][0])
+    def getLineFileInfo(self, showFullPath, clr, **kwargs):
+        caller = kwargs.get("caller", getframeinfo(stack()[-1][0]))
         filePath = os.path.basename(
             caller.filename) if not showFullPath else caller.filename
         line = colored(f"Ln {caller.lineno}", "white", f"on_{clr}")
@@ -95,40 +99,75 @@ class SimpleDebug:
         kwargs["msg"] = msg
         self.simpleAutoPrint(**kwargs)
 
-    def simpleAutoVars(self, **kwargs):
+    # autoVars config setter
+    def vc(self, slot, *filters, **kwargs):
+        self.simpleAutoVarsConfigs[slot] = (filters, kwargs)
+
+    def simpleAutoVars(self, config_slot, **kwargs):
+        clr = kwargs.get("clr", "cyan")
         index = colored(f"[V{self.simpleAutoVarsIndex}]",
                         "grey", attrs=['dark'])
         timestamp = colored(self.getTimestamp(
             time.perf_counter()), attrs=["reverse"])
 
-        lnf = self.getLineFileInfo(kwargs.get(
-            "showFullPath", False), kwargs["clr"])
+        lnf = self.getLineFileInfo(kwargs.get("showFullPath", False), clr)
 
         # Creates vars from globals by removing dunders, functions and modules
-        autoVars = {k: v for k, v in globals().items() if not(
-            (k.startswith("__") and k.endswith("__")) or callable(v) or isinstance(v, ModuleType))}
-
-        if kwargs["inline"]:
-            sidebar = colored(' ', kwargs['clr'], attrs=['reverse'])
-            formattedAutoVars = f", ".join(
-                [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
-            print(
-                f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
+        filters = self.simpleAutoVarsConfigs[config_slot][0] if config_slot else kwargs.get(
+            "filter", None)
+        if(filters):
+            autoVars = {k: v for k, v in globals().items() if k in filters}
         else:
-            sidebar = colored(' ', kwargs['clr'], attrs=['reverse'])
-            # Formats with a join
-            formattedAutoVars = f"\n{sidebar} ".join(
-                [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
-            print(
-                f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
+            autoVars = {k: v for k, v in globals().items() if not(
+                (k.startswith("__") and k.endswith("__")) or callable(v) or isinstance(v, ModuleType))}
+
+        sidebar = colored(' ', clr, attrs=['reverse'])
+        joiner = (", " if kwargs.get("inline", False) else f"\n{sidebar} ")
+
+        formattedAutoVars = joiner.join(
+            [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
+
+        print(
+            f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
 
         self.simpleAutoVarsIndex += 1
 
-    def v(self, inline=False, clr="cyan", **kwargs):
-        kwargs["inline"] = inline
-        kwargs["clr"] = clr
-        self.simpleAutoVars(**kwargs)
+    def v(self, slot, **kwargs):
+        if not slot in self.simpleAutoVarsConfigs:
+            raise Exception(
+                f"Auto Var Config Error: Slot \"{slot}\" was not found. Ensure that you've used pd.vc(slot) to create the respective configuration")
+        else:
+            self.simpleAutoVars(
+                slot, **(self.simpleAutoVarsConfigs[slot][1] | kwargs))
+
+    def track(self, var, delay, duration=None, **kwargs):
+        self.trackedIndices[var] = 0
+
+        def printTrackInfo(varName, delay, duration, caller):
+            startTime = time.perf_counter()
+            while True:
+                index = colored(
+                    f'[T{self.trackedIndices[varName]}]', "grey", attrs=["dark"])
+                lnf = self.getLineFileInfo(False, "magenta", caller=caller)
+                clr_val = colored(
+                    f'{varName} = {globals()[varName]}', "magenta")
+                print(
+                    f'{index}    {clr_val}    {self.getTimestamp(time.perf_counter())}    |TRACK|    {lnf}')
+                self.trackedIndices[varName] += 1
+                time.sleep((delay / 1000))
+                if (time.perf_counter() - startTime) > duration:
+                    break
+
+        t = threading.Thread(target=printTrackInfo,
+                             args=(var, delay, duration, getframeinfo(stack()[-1][0])))
+        t.start()
 
 
 sd = SimpleDebug()
-sd.v(False)
+sd.vc(2, "a", "b")
+
+sd.track("a", 10, 10)
+
+for i in range(1000):
+    a += 1
+    time.sleep(0.1)

@@ -101,21 +101,19 @@ class QuickerDebug:
         lnf = self.getLineFileInfo(kwargs.get("showFullPath", False), color)
 
         # Creates vars from globals by removing dunders, functions and modules
-        glbs = stack()[-1][0].f_globals
         filters = self.simpleAutoVarsConfigs[config_slot][0] if config_slot else kwargs.get(
             "filter", None)
         if(filters):
-            autoVars = {k: v for k, v in glbs.items() if k in filters}
+            autoVars = {k: v for k, v in globals().items() if k in filters}
         else:
-            autoVars = {k: v for k, v in glbs.items() if not(
+            autoVars = {k: v for k, v in globals().items() if not(
                 (k.startswith("__") and k.endswith("__")) or callable(v) or isinstance(v, ModuleType))}
 
         sidebar = colored(' ', color, attrs=['reverse'])
         joiner = (", " if kwargs.get("inline", False) else f"\n{sidebar} ")
-        
-        def qs(v): return (f'\'{v}\'' if isinstance(v, str) else v)
+
         formattedAutoVars = joiner.join(
-            [f"{k} = {colored(qs(v), self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
+            [f"{k} = {colored(v, self.typeColors.get(type(v).__name__, 'grey'))}" for k, v in autoVars.items()])
 
         print(
             f'{sidebar} {index}  {timestamp}   |VARS CALL|    {lnf}\n{sidebar} {str(formattedAutoVars)}')
@@ -136,15 +134,14 @@ class QuickerDebug:
         self.trackedIndices[var] = 0
         autoclear = kwargs.get("autoclear", False)
 
-        def printTrackInfo(varName, delay, duration, frame, autoclear):
+        def printTrackInfo(varName, delay, duration, caller, autoclear):
             startTime = time.perf_counter()
             while True:
                 index = colored(
                     f'[T{self.trackedIndices[varName]}]', "grey", attrs=["dark"])
-                lnf = self.getLineFileInfo(
-                    False, "magenta", caller=getframeinfo(frame))
+                lnf = self.getLineFileInfo(False, "magenta", caller=caller)
                 clr_val = colored(
-                    f'{varName} = {frame.f_globals[varName]}', "magenta")
+                    f'{varName} = {globals()[varName]}', "magenta")
                 print(
                     f'{index}    {clr_val}    {self.getTimestamp(time.perf_counter())}    |TRACK|    {lnf}')
                 if autoclear:
@@ -156,7 +153,7 @@ class QuickerDebug:
                         break
 
         t = threading.Thread(target=printTrackInfo,
-                             args=(var, delay, duration, stack()[-1][0], autoclear))
+                             args=(var, delay, duration, getframeinfo(stack()[-1][0]), autoclear))
         t.start()
 
         # Real Time Tracker Preset

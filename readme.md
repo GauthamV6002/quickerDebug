@@ -1,5 +1,7 @@
 # Welcome to quickerDebug!
 
+## ⚠️ Please note that this package is currently in development.
+
 QuickerDebug offers a standardized alternative to `print("here")` and `print(my_var)` with simple, quick, and efficient logging functions that provide information without the need to repeat yourself. Generally, the best use case is for small scale applications or test code, where a complete debugger is overkill, but `print("here")` can get overly tedious to repeatedly type. Function names are purposefully shortened avoid writing out long function calls, so you don't waste time while debugging.
 
 Note that quickerDebug is optimized for terminals supported colors (through `termcolor`), meaning it may not work on all CLIs.
